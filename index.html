@@ -1,0 +1,354 @@
+<!DOCTYPE html><html lang="zh-TW"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>學習中心</title>
+<meta name="theme-color" content="#16294e">
+<style>
+:root{
+  --navy:#16294e; --navy2:#2E74B5; --amber:#D97706; --amber-bg:#FEF3C7;
+  --bg:#FAFAF9; --card:#FFF; --bd:#E5E5E0; --ink:#1F2937; --mut:#6B7280;
+  --ok:#15803D; --danger:#B91C1C; --r:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 "PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:90px}
+button{font-family:inherit;cursor:pointer}
+a{color:var(--navy2)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 14px}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:calc(14px + env(safe-area-inset-top)) 0 14px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hrow h1{margin:0;font-size:20px;letter-spacing:.03em}
+.hrow h1 small{font-weight:400;opacity:.75;font-size:12px;margin-left:8px}
+.userchip{display:flex;background:rgba(255,255,255,.16);border-radius:20px;padding:3px}
+.userchip button{border:none;background:transparent;color:#fff;opacity:.7;padding:5px 14px;border-radius:16px;font-size:14px}
+.userchip button.on{background:#fff;color:var(--navy);opacity:1;font-weight:700}
+.stats{display:flex;gap:8px;margin-top:12px}
+.stat{flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;text-align:center}
+.stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;opacity:.8}
+.tabs{display:flex;gap:2px;margin:14px 0 0;border-bottom:2px solid var(--bd)}
+.tabs button{flex:1;max-width:160px;background:none;border:none;padding:10px;font-size:15px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
+.tabs button.on{color:var(--navy);border-color:var(--navy)}
+.pane{display:none;padding:14px 0}
+.pane.on{display:block}
+.search{display:flex;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:2px 12px;margin-bottom:10px}
+.search input{flex:1;border:none;outline:none;font:inherit;padding:9px 0;background:none}
+.search span{font-size:12px;color:var(--mut);white-space:nowrap}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.chips button{white-space:nowrap;border:1.5px solid var(--bd);background:var(--card);border-radius:16px;padding:5px 13px;font-size:13px;color:var(--ink)}
+.chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.src{font-size:12px;color:var(--mut);margin:2px 0 10px}
+.src .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--mut);vertical-align:1px}
+.src.live .dot{background:var(--ok)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.cc .cover{aspect-ratio:16/9;background:linear-gradient(135deg,#DCE4F0,#F0EAE0);position:relative}
+.cc .cover img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
+.cc .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#9aa8c0}
+.cc .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.cc h3{margin:0;font-size:14px;line-height:1.45;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.meta{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--mut)}
+.meta .tag{background:#F4F4F2;border-radius:10px;padding:1px 9px}
+.mins{font-size:11.5px;color:var(--amber);font-weight:600}
+.cc .go{margin-top:auto;border:none;background:var(--navy);color:#fff;border-radius:9px;padding:10px;font-size:15px;font-weight:700;letter-spacing:.05em}
+.cc .go:active{transform:scale(.98)}
+.empty{text-align:center;color:var(--mut);padding:40px 0}
+.rday{margin:16px 0 6px;font-size:13px;font-weight:700;color:var(--mut)}
+.rec{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.rec .who{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex:none}
+.rec .who.me{background:var(--navy2)} .rec .who.wife{background:#DB2777}
+.rec .rc{flex:1;min-width:0}
+.rec .rc b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .rc span{font-size:12px;color:var(--mut)}
+.rec .rm{font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rec .sync{font-size:10px;color:var(--mut)}
+.rec .sync.ok{color:var(--ok)}
+.veil{position:fixed;inset:0;background:rgba(20,30,50,.5);display:none;z-index:40}
+.veil.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;transform:translateY(105%);transition:transform .25s ease;max-height:88vh;overflow-y:auto}
+.sheet.on{transform:none}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+.sheet h2{margin:0 0 2px;font-size:17px}
+.sheet .cname{color:var(--mut);font-size:13px;margin:0 0 14px;line-height:1.5}
+.step{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--bd)}
+.step .no{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none}
+.step .sc{flex:1}
+.step .sc b{font-size:15px}
+.step .sc p{margin:3px 0 8px;font-size:12.5px;color:var(--mut)}
+.btn{display:inline-block;border:none;border-radius:9px;padding:10px 16px;font-size:14.5px;font-weight:700;text-decoration:none;text-align:center}
+.btn.ghost{background:#EFF3FA;color:var(--navy)}
+.btn.main{background:var(--amber);color:#fff;width:100%;padding:13px;font-size:16px}
+.btn.gray{background:#F0F0EE;color:var(--mut)}
+.tip{background:var(--amber-bg);border-left:3px solid var(--amber);border-radius:6px;padding:8px 10px;font-size:12.5px;color:#92400E;margin:6px 0}
+.sheet .cancel{width:100%;margin-top:10px;background:none;border:none;color:var(--mut);padding:8px;font-size:14px}
+.dock{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;background:var(--navy);color:#fff;border-radius:14px;padding:10px 14px;display:none;align-items:center;gap:12px;box-shadow:0 6px 20px rgba(22,41,78,.4);max-width:560px;margin:0 auto}
+.dock.on{display:flex}
+.dock .pulse{width:10px;height:10px;border-radius:50%;background:var(--amber);flex:none;animation:pu 1.6s infinite}
+@keyframes pu{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.dock .pulse{animation:none}}
+.dock .dc{flex:1;min-width:0}
+.dock .dc b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.dock .dc time{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.dock .end{border:none;background:var(--amber);color:#fff;border-radius:9px;padding:10px 16px;font-size:15px;font-weight:700;flex:none}
+.field{margin:12px 0}
+.field label{display:block;font-size:13px;color:var(--mut);margin-bottom:5px}
+.field input,.field textarea{width:100%;border:1px solid var(--bd);border-radius:9px;padding:10px;font:inherit;background:var(--bg)}
+.row2{display:flex;gap:10px}.row2>*{flex:1}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;z-index:99;display:none;max-width:90vw}
+button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offset:2px}
+</style></head><body>
+
+<header><div class="wrap">
+  <div class="hrow">
+    <h1>學習中心<small id="today"></small></h1>
+    <div class="userchip" role="group" aria-label="學習者">
+      <button id="uMe" onclick="setUser('我')">我</button>
+      <button id="uWife" onclick="setUser('老婆')">老婆</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="stWeekMin">0</b><span>本週分鐘</span></div>
+    <div class="stat"><b id="stWeekCnt">0</b><span>本週次數</span></div>
+    <div class="stat"><b id="stTotalHr">0</b><span>累積小時</span></div>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button id="tabC" class="on" onclick="switchTab('c')">🎓 課程</button>
+    <button id="tabR" onclick="switchTab('r')">🕐 學習紀錄</button>
+  </div>
+
+  <div id="paneC" class="pane on">
+    <div class="src" id="srcInfo"><span class="dot"></span>載入中…</div>
+    <div class="search"><input id="q" placeholder="搜尋課程名稱、平台、性質…" oninput="render()"><span id="cnt"></span></div>
+    <div class="chips" id="platChips"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="paneR" class="pane">
+    <div class="chips" id="recFilter">
+      <button class="on" data-w="all" onclick="setRecFilter('all',this)">全部</button>
+      <button data-w="我" onclick="setRecFilter('我',this)">我</button>
+      <button data-w="老婆" onclick="setRecFilter('老婆',this)">老婆</button>
+    </div>
+    <div id="recList"></div>
+  </div>
+</div>
+
+<div class="veil" id="veil" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="開始上課">
+  <h2>準備上課</h2>
+  <p class="cname" id="shName"></p>
+  <div class="step">
+    <div class="no">1</div>
+    <div class="sc">
+      <b>開啟 Notion 錄音</b>
+      <p>跳到「開始聽課」頁後,按下 AI 會議記錄的錄音鈕,再切回來。</p>
+      <a class="btn ghost" id="btnNotion" href="#" target="_blank" rel="noopener">開啟 Notion ↗</a>
+      <div class="tip" id="tipDevice"></div>
+      <div class="tip">🚗 開車聽課:請在<b>出發前停妥時</b>完成所有步驟並開始播放,行車中請勿操作手機。</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="no">2</div>
+    <div class="sc">
+      <b>開始計時,前往課程</b>
+      <p>按下後開始計時並開啟課程頁面。看完課回到這裡按「結束上課」。</p>
+      <button class="btn main" id="btnGo">開始上課 ▶</button>
+    </div>
+  </div>
+  <button class="cancel" onclick="closeSheet()">先不要,回課程清單</button>
+</div>
+
+<div class="sheet" id="endSheet" role="dialog" aria-modal="true" aria-label="結束上課">
+  <h2>結束上課</h2>
+  <p class="cname" id="endName"></p>
+  <div class="row2">
+    <div class="field"><label>這次上了(分鐘)</label><input id="endMin" type="number" min="0" inputmode="numeric"></div>
+    <div class="field"><label>學習者</label><input id="endUser" readonly></div>
+  </div>
+  <div class="field"><label>備註(選填)</label><textarea id="endNote" rows="2" placeholder="這節課的重點、進度…"></textarea></div>
+  <button class="btn main" onclick="saveRecord()">儲存紀錄 ✓</button>
+  <button class="cancel" onclick="discardSession()">放棄這筆,不記錄</button>
+</div>
+
+<div class="dock" id="dock">
+  <div class="pulse" aria-hidden="true"></div>
+  <div class="dc"><b id="dockName"></b><time id="dockTime">00:00</time></div>
+  <button class="end" onclick="openEnd()">結束上課</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════ 設定區:部署時只需要改這裡 ═══════════ */
+const CONFIG = {
+  N8N_COURSES_URL: "",
+  N8N_LOG_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-log",
+  NOTION_APP_LINK: "notion://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
+  NOTION_WEB_LINK: "https://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
+  COVER_BASE: "./covers/"
+};
+/* ═══════════════════════════════════════════════ */
+
+const FALLBACK_COURSES = [{"n":"世界冠軍的頭部鬆筋術｜解除痠痛 X 緊緻輪廓","p":"PressPlay","g":"健康","u":"https://www.pressplay.cc","c":"世界冠軍的頭部鬆筋術｜解除痠痛 X 緊緻輪廓.jpg"},{"n":"Heptabase 數位子彈筆記｜規劃人生、管理工作，取回人生主導權","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc","c":"Heptabase 數位子彈筆記｜規劃人生、管理工作，取回人生主導權.jpg"},{"n":"AI應用時代｜從邏輯思維到文字溝通，從職場複利到高效生活","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc","c":"AI應用時代｜從邏輯思維到文字溝通，從職場複利到高效生活.jpg"},{"n":"卡片盒筆記實戰課｜靈感捕捉到高效產出的知識管理系統","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc","c":"卡片盒筆記實戰課｜靈感捕捉到高效產出的知識管理系統.jpg"},{"n":"爆發閱讀課｜五步驟打造閱讀IP，從有效閱讀到創造價值！","p":"PressPlay","g":"閱讀","u":"https://www.pressplay.cc","c":"爆發閱讀課｜五步驟打造閱讀IP，從有效閱讀到創造價值！.jpg"},{"n":"【化輸入為輸出】九堂課教你輸出高品質內容","p":"PressPlay","g":"閱讀","u":"https://www.pressplay.cc","c":"【化輸入為輸出】九堂課教你輸出高品質內容.jpg"},{"n":"【爆文寫作課】運用爆文思維，讓你的靈感源源不絕！","p":"PressPlay","g":"閱讀","u":"https://www.pressplay.cc","c":"【爆文寫作課】運用爆文思維，讓你的靈感源源不絕！.jpg"},{"n":"從零打造你的 AI Agent：n8n 入門與實戰課程","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc","c":"從零打造你的 AI Agent：n8n 入門與實戰課程.jpg"},{"n":"阿包醫生陪你養寶包｜爸媽必備幼兒養育健康知識","p":"PressPlay","g":"育兒","u":"https://www.pressplay.cc","c":"阿包醫生陪你養寶包｜爸媽必備幼兒養育健康知識.jpg"},{"n":"企業財稅必修課｜五大模型帶你合法節稅、精準避險","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"企業財稅必修課｜五大模型帶你合法節稅、精準避險.avif"},{"n":"卡片盒筆記思考術｜知識個體再進化","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"卡片盒筆記思考術｜知識個體再進化.avif"},{"n":"停止內耗｜阿德勒Ｘ完形心理學，帶你走出反覆卡關的人生","p":"知識衛星","g":"身心靈","u":"https://sat.cool/home","c":"停止內耗｜阿德勒Ｘ完形心理學，帶你走出反覆卡關的人生停止內耗｜阿德勒Ｘ完形心理學，帶你走出反覆卡關的人生.avif"},{"n":"張西的細膩書寫｜用書寫練習療癒自己，寫下觸動瞬間","p":"知識衛星","g":"身心靈","u":"https://sat.cool/home","c":"張西的細膩書寫｜用書寫練習療癒自己，寫下觸動瞬間.avif"},{"n":"AI First 行動力｜帶你降本、增效、創造新商機","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"AI First 行動力｜帶你降本、增效、創造新商機.avif"},{"n":"PM 思維升級實戰｜打造變動時代的專案主導力","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"PM 思維升級實戰｜打造變動時代的專案主導力.avif"},{"n":"郝旭烈的60天商管學院","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"郝旭烈的60天商管學院.avif"},{"n":"情緒Ｘ溝通Ｘ人際經營｜周慕姿的全方位關係應用課","p":"知識衛星","g":"身心靈","u":"https://sat.cool/home","c":"情緒Ｘ溝通Ｘ人際經營｜周慕姿的全方位關係應用課.avif"},{"n":"AI 瓦基第二大腦｜打造不被淘汰、越用越強的 AI 工作流","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"AI 瓦基第二大腦｜打造不被淘汰、越用越強的 AI 工作流.avif"},{"n":"工作流改造術｜用更少時間，結合協作 AI 重塑工作方式","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home","c":"工作流改造術｜用更少時間，結合協作 AI 重塑工作方式.jpg"},{"n":"Notion AI 知識管理：打造比 ChatGPT 更直覺的助理","p":"Hahow - 好學校","g":"職涯生產力","u":"https://hahow.in","c":"Notion AI 知識管理：打造比 ChatGPT 更直覺的助理.avif"},{"n":"現代人的學以致用全指南｜21 天建立高效學習的輸出習慣","p":"Hahow - 好學校","g":"職涯生產力","u":"https://hahow.in","c":"現代人的學以致用全指南.avif"},{"n":"劉奕酉的職場致勝賽局—從洞察、突圍到創造有利局面","p":"Hahow - 好學校","g":"職涯生產力","u":"https://hahow.in","c":"劉奕酉的職場致勝賽局—從洞察、突圍到創造有利局面.avif"},{"n":"好想法好好說 - 潘月琪的12堂質感說話課","p":"Hahow - 好學校","g":"身心靈","u":"https://hahow.in","c":"好想法好好說 - 潘月琪的12堂質感說話課.avif"},{"n":"Notion 實戰課程：打造專屬數位工作術","p":"Hahow - 好學校","g":"職涯生產力","u":"https://hahow.in","c":"Notion 實戰課程：打造專屬數位工作術.avif"},{"n":"高效閱讀、有效輸出－學習實踐知識的技術","p":"Hahow - 好學校","g":"閱讀","u":"https://hahow.in","c":"高效閱讀、有效輸出－學習實踐知識的技術.avif"},{"n":"【迷你課】24 小時開始活用 Claude Code（AI Agent）","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【迷你課】24 小時開始活用 Claude Code（AI Agent）.jpg"},{"n":"【迷你課】24 小時開始成為遠距工作者","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【迷你課】24 小時開始成為遠距工作者.png"},{"n":"【迷你課】24 小時開始活用 Heptabase","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【迷你課】24 小時開始活用 Heptabase.png"},{"n":"【Heptabase 數位筆記課】現代人必學的輸出向筆記術，從內容收集、學習筆記到個人化知識管理工作流","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【Heptabase 數位筆記課】現代人必學的輸出向筆記術，從內容收集、學習筆記到個人化知識管理工作流.png"},{"n":"【線上課】ChatGPT 工作術：從入門到精通，打造專屬 AI 機器人助理 - 立刻學習 + 豐富學習資源","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【線上課】ChatGPT 工作術：從入門到精通，打造專屬 AI 機器人助理 - 立刻學習 + 豐富學習資源.jpg"},{"n":"【入門課】你的第一堂 Notion 課，三大基礎應用，客製化個人數位工作站","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/","c":"【入門課】你的第一堂 Notion 課，三大基礎應用，客製化個人數位工作站.png"},{"n":"王永福教學的技術：人人搶著上你的課","p":"F學院","g":"職涯生產力","u":"https://funi.best","c":"王永福教學的技術：人人搶著上你的課.jpg"},{"n":"工作與生活的技術：21天解鎖潛能，實現願景的人生指南","p":"F學院","g":"職涯生產力","u":"https://funi.best","c":"工作與生活的技術：21天解鎖潛能，實現願景的人生指南.jpg"},{"n":"解鎖單元-工作與生活的技術：21天解鎖潛能，實現願景的人生指南","p":"F學院","g":"職涯生產力","u":"https://funi.best","c":"解鎖單元-工作與生活的技術：21天解鎖潛能，實現願景的人生指南.jpg"},{"n":"簡報的技術：改變人生的經典必修課","p":"F學院","g":"職涯生產力","u":"https://funi.best","c":"簡報的技術：改變人生的經典必修課.jpg"},{"n":"從平凡到非凡：謝文憲的影響力行動課","p":"F學院","g":"職涯生產力","u":"https://funi.best/","c":"從平凡到非凡：謝文憲的影響力行動課.jpg"},{"n":"林孟彥｜Office 高效工作術","p":"ShiFu 師父","g":"職涯生產力","u":"https://shifu.tw/","c":"林孟彥｜Office 高效工作術.jpg"},{"n":"安定教養實戰課","p":"ShiFu 師父","g":"親子教育","u":"https://shifu.tw/","c":"安定教養實戰課.jpg"},{"n":"定期定額健身課","p":"ShiFu 師父","g":"健康","u":"https://shifu.tw/","c":"定期定額健身課.jpg"},{"n":"超級個體工作術","p":"ShiFu 師父","g":"職涯生產力","u":"https://shifu.tw/","c":"超級個體工作術.jpg"},{"n":"專屬於你的家庭健身房","p":"大大讀書","g":"健康","u":"https://www.dada-master.com/","c":"專屬於你的家庭健身房.jpg"},{"n":"大大健康・你耳邊的家庭醫師","p":"大大讀書","g":"健康","u":"https://www.dada-master.com/","c":"大大健康・你耳邊的家庭醫師.jpg"},{"n":"從零開始 AI 寫程式｜用 1% 關鍵知識消滅瑣事、解放創意","p":"Mosky AI","g":"職涯生產力","u":"https://learn.mosky.tw","c":"從零開始 AI 寫程式｜用 1% 關鍵知識消滅瑣事、解放創意.png"},{"n":"打造你的 AI 思考夥伴：NotebookLM 釋放你的知識超能力","p":"VK科技閱讀時間","g":"職涯生產力","u":"https://vktechread.kaik.io/","c":"打造你的 AI 思考夥伴：NotebookLM 釋放你的知識超能力.png"},{"n":"30天打造立即可用的圖解力全攻略","p":"圖解力學院","g":"職涯生產力","u":"https://drawwin.kaik.io/","c":"30天打造立即可用的圖解力全攻略.png"},{"n":"個人數位生產力｜電腦玩物Esor的30個解決問題、養成習慣、高效產出、時間管理模組","p":"城邦學院","g":"職涯生產力","u":"https://www.cite.tw/producers/innofair/courses/485?variant_id=867&amp;utm_source=EDM&amp;utm_medium=INNOFAIR&amp;utm_campaign=CAPACITY","c":"個人數位生產力｜電腦玩物Esor的30個解決問題、養成習慣、高效產出、時間管理模組.jpg"},{"n":"15個高效學習法則，快速上手新能力","p":"天下學習","g":"職涯生產力","u":"https://www.cwlearning.com.tw/","c":"15個高效學習法則，快速上手新能力.png"},{"n":"高效習慣工作力","p":"艾上成長學院","g":"職涯生產力","u":"https://course.17rich.com/","c":"高效習慣工作力.jpg"},{"n":"總校長的 AI 教育寶典｜掌握未來 30 年必備的聰明學習力","p":"word-up","g":"親子教育","u":"https://shop.wordup.com.tw/","c":"總校長的 AI 教育寶典｜掌握未來 30 年必備的聰明學習力.avif"}];
+
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部';
+
+function setUser(u){user=u;store.set('lc_user',u);$('uMe').classList.toggle('on',u==='我');$('uWife').classList.toggle('on',u!=='我');renderRecords();renderStats();}
+(function initUser(){
+  const p=new URLSearchParams(location.search).get('user');
+  const u=p==='wife'?'老婆':p==='me'?'我':store.get('lc_user','我');
+  setUser(u);
+})();
+
+function useCourses(list,label,live){
+  courses=list;
+  $('srcInfo').innerHTML='<span class="dot"></span>'+label;
+  $('srcInfo').classList.toggle('live',!!live);
+  buildChips();render();
+}
+async function loadCourses(){
+  const cached=store.get('lc_courses_cache',null);
+  if(cached&&cached.courses) useCourses(cached.courses,'快取資料('+cached.at.slice(0,10)+')',false);
+  else useCourses(FALLBACK_COURSES,'內建課程資料(49 門)',false);
+  if(!CONFIG.N8N_COURSES_URL) return;
+  try{
+    const r=await fetch(CONFIG.N8N_COURSES_URL,{cache:'no-store'});
+    const d=await r.json();
+    if(d&&d.courses&&d.courses.length){
+      store.set('lc_courses_cache',{courses:d.courses,at:d.fetchedAt||new Date().toISOString()});
+      useCourses(d.courses,'已連線 Notion 課程清單('+d.courses.length+' 門)',true);
+    }
+  }catch(e){}
+}
+
+function courseMinutes(name){return records().filter(r=>r.course===name).reduce((s,r)=>s+r.minutes,0)}
+function buildChips(){
+  const ps=['全部',...new Set(courses.map(c=>c.p).filter(Boolean))];
+  $('platChips').innerHTML=ps.map(p=>`<button class="${p===platSel?'on':''}" onclick="platSel='${p.replace(/'/g,"\\'")}';buildChips();render()">${p}</button>`).join('');
+}
+function coverURL(c){
+  if(c.cv&&/^https?:/.test(c.cv))return c.cv;
+  if(c.cv)return CONFIG.COVER_BASE+encodeURIComponent(c.cv);
+  if(c.c)return CONFIG.COVER_BASE+encodeURIComponent(c.c);
+  return '';
+}
+function render(){
+  const q=($('q').value||'').trim().toLowerCase();
+  const list=courses.filter(c=>{
+    if(platSel!=='全部'&&c.p!==platSel)return false;
+    if(q&&!((c.n+c.p+(c.g||'')).toLowerCase().includes(q)))return false;
+    return true;
+  });
+  $('cnt').textContent=list.length+' 門';
+  $('grid').innerHTML=list.map((c,i)=>{
+    const cu=coverURL(c),m=courseMinutes(c.n);
+    return `<div class="cc">
+      <div class="cover">${cu?`<img loading="lazy" src="${cu}" alt="" onerror="this.remove()">`:''}<div class="ph">🎓</div></div>
+      <div class="body">
+        <h3>${c.n}</h3>
+        <div class="meta"><span class="tag">${c.p||''}</span>${c.g?`<span class="tag">${c.g}</span>`:''}${m?`<span class="mins">已學 ${m} 分鐘</span>`:''}</div>
+        <button class="go" onclick="openSheet(${courses.indexOf(c)})">開始上課</button>
+      </div></div>`;
+  }).join('')||'<div class="empty">沒有符合的課程</div>';
+}
+
+let sheetCourse=null;
+function deviceName(){const u=navigator.userAgent;if(/iPad|Tablet/i.test(u)||(navigator.maxTouchPoints>1&&/Macintosh/.test(u)))return '平板';if(/Mobi|iPhone|Android/i.test(u))return '手機';return '電腦';}
+function openSheet(i){
+  sheetCourse=courses[i];
+  $('shName').textContent=sheetCourse.n+'('+(sheetCourse.p||'')+')';
+  const dev=deviceName();
+  $('tipDevice').innerHTML=dev==='電腦'
+    ?'💻 電腦上課:Notion 桌面版可直接錄系統聲音,<b>戴耳機也錄得到</b>。'
+    :'📢 '+dev+'上課:請<b>用喇叭外放</b>課程聲音,戴耳機 Notion 會錄不到;環境盡量安靜。';
+  $('btnNotion').href=CONFIG.NOTION_APP_LINK;
+  $('btnNotion').onclick=e=>{e.preventDefault();location.href=CONFIG.NOTION_APP_LINK;setTimeout(()=>window.open(CONFIG.NOTION_WEB_LINK,'_blank'),1200);};
+  $('btnGo').onclick=startSession;
+  $('veil').classList.add('on');$('sheet').classList.add('on');
+}
+function closeSheet(){$('veil').classList.remove('on');$('sheet').classList.remove('on');$('endSheet').classList.remove('on');}
+function startSession(){
+  active={course:sheetCourse.n,courseId:sheetCourse.id||null,start:new Date().toISOString(),user,device:deviceName()};
+  store.set('lc_active',active);
+  closeSheet();showDock();
+  if(sheetCourse.u)window.open(sheetCourse.u,'_blank');
+  toast('計時開始,加油!');
+}
+function showDock(){
+  $('dockName').textContent=active.course;
+  $('dock').classList.add('on');
+  clearInterval(tick);tick=setInterval(()=>{
+    const s=Math.floor((Date.now()-new Date(active.start))/1000);
+    $('dockTime').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+}
+function openEnd(){
+  $('endName').textContent=active.course;
+  $('endMin').value=Math.max(1,Math.round((Date.now()-new Date(active.start))/60000));
+  $('endUser').value=active.user;$('endNote').value='';
+  $('veil').classList.add('on');$('endSheet').classList.add('on');
+}
+function discardSession(){active=null;store.set('lc_active',null);clearInterval(tick);$('dock').classList.remove('on');closeSheet();toast('已放棄,未記錄');}
+function saveRecord(){
+  const rec={id:'r'+Date.now(),course:active.course,courseId:active.courseId,user:active.user,device:active.device,
+    start:active.start,end:new Date().toISOString(),minutes:Math.max(0,parseInt($('endMin').value)||0),
+    note:$('endNote').value.trim(),synced:false};
+  const rs=records();rs.unshift(rec);store.set('lc_records',rs);
+  discardSession();
+  renderRecords();renderStats();render();
+  syncOne(rec);
+}
+
+function records(){return store.get('lc_records',[])}
+async function syncOne(rec){
+  if(!CONFIG.N8N_LOG_URL){toast('已存在本機(尚未設定 Notion 同步)');return;}
+  try{
+    const r=await fetch(CONFIG.N8N_LOG_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
+    if(r.ok){const rs=records();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);renderRecords();toast('已同步到 Notion ✓');return;}
+    throw 0;
+  }catch(e){toast('已存在本機,連上網後會再同步');}
+}
+async function syncPending(){
+  if(!CONFIG.N8N_LOG_URL)return;
+  for(const rec of records().filter(r=>!r.synced))await syncOne(rec);
+}
+function setRecFilter(w,btn){recFilterW=w;document.querySelectorAll('#recFilter button').forEach(b=>b.classList.toggle('on',b===btn));renderRecords();}
+function renderRecords(){
+  const rs=records().filter(r=>recFilterW==='all'||r.user===recFilterW);
+  if(!rs.length){$('recList').innerHTML='<div class="empty">還沒有紀錄。到「課程」按「開始上課」,第一筆就會出現在這裡。</div>';return;}
+  let html='',day='';
+  for(const r of rs){
+    const d=r.start.slice(0,10);
+    if(d!==day){day=d;html+=`<div class="rday">${d}</div>`;}
+    html+=`<div class="rec"><div class="who ${r.user==='我'?'me':'wife'}">${r.user==='我'?'我':'妻'}</div>
+      <div class="rc"><b>${r.course}</b><span>${r.start.slice(11,16)}・${r.device}${r.note?'・'+r.note:''}</span></div>
+      <div><div class="rm">${r.minutes} 分</div><div class="sync ${r.synced?'ok':''}">${r.synced?'已同步✓':'待同步'}</div></div></div>`;
+  }
+  $('recList').innerHTML=html;
+}
+function renderStats(){
+  const now=new Date(),wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));wk.setHours(0,0,0,0);
+  const mine=records().filter(r=>r.user===user);
+  const w=mine.filter(r=>new Date(r.start)>=wk);
+  $('stWeekMin').textContent=w.reduce((s,r)=>s+r.minutes,0);
+  $('stWeekCnt').textContent=w.length;
+  $('stTotalHr').textContent=(mine.reduce((s,r)=>s+r.minutes,0)/60).toFixed(1);
+}
+
+function switchTab(t){$('tabC').classList.toggle('on',t==='c');$('tabR').classList.toggle('on',t==='r');$('paneC').classList.toggle('on',t==='c');$('paneR').classList.toggle('on',t==='r');}
+let toastT=null;function toast(m){$('toast').textContent=m;$('toast').style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>$('toast').style.display='none',2600);}
+$('today').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'});
+
+(function boot(){
+  const a=store.get('lc_active',null);
+  if(a){active=a;showDock();}
+  renderRecords();renderStats();
+  loadCourses();syncPending();
+})();
+</script>
+</body></html>
