@@ -213,7 +213,8 @@ async function loadCourses(){
   if(!CONFIG.N8N_COURSES_URL) return;
   try{
     const r=await fetch(CONFIG.N8N_COURSES_URL,{cache:'no-store'});
-    const d=await r.json();
+    let d=await r.json();
+    if(Array.isArray(d))d=d[0];
     if(d&&d.courses&&d.courses.length){
       store.set('lc_courses_cache',{courses:d.courses,at:d.fetchedAt||new Date().toISOString()});
       useCourses(d.courses,'已連線 Notion 課程清單('+d.courses.length+' 門)',true);
