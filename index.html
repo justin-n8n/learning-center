@@ -278,6 +278,7 @@ function coverURL(c){
   return '';
 }
 function coverFallback(c){
+  if(c.id)return CONFIG.COVER_BASE+c.id+'.jpg';
   const f=c.cf||c.c;
   if(f)return CONFIG.COVER_BASE+encodeURIComponent(f);
   return '';
