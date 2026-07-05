@@ -1,7 +1,14 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v3</title>
+<title>學習中心 v4</title>
 <meta name="theme-color" content="#16294e">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="學習中心">
 <style>
 :root{
   --navy:#16294e; --navy2:#2E74B5; --amber:#D97706; --amber-bg:#FEF3C7;
@@ -42,7 +49,7 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .cc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
 .cc .cover{aspect-ratio:16/9;background:linear-gradient(135deg,#DCE4F0,#F0EAE0);position:relative}
-.cc .cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cc .cover img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
 .cc .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#9aa8c0}
 .cc .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
 .cc h3{margin:0;font-size:14px;line-height:1.45;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
@@ -101,7 +108,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
     <h1>學習中心<small id="today"></small></h1>
     <div class="userchip" role="group" aria-label="學習者">
       <button id="uMe" onclick="setUser('我')">我</button>
-      <button id="uWife" onclick="setUser('老婆')">老婆</button>
+      <button id="uWife" onclick="setUser('老婆')">Ann</button>
     </div>
   </div>
   <div class="stats">
@@ -126,10 +133,11 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
     <div class="grid" id="grid"></div>
   </div>
   <div id="paneR" class="pane">
+    <div class="src" id="recSrcInfo"><span class="dot"></span>載入中…</div>
     <div class="chips" id="recFilter">
       <button class="on" data-w="all" onclick="setRecFilter('all',this)">全部</button>
       <button data-w="我" onclick="setRecFilter('我',this)">我</button>
-      <button data-w="老婆" onclick="setRecFilter('老婆',this)">老婆</button>
+      <button data-w="老婆" onclick="setRecFilter('老婆',this)">Ann</button>
     </div>
     <div id="recList"></div>
   </div>
@@ -184,10 +192,14 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
 const CONFIG = {
   N8N_COURSES_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-courses",
   N8N_LOG_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-log",
+  N8N_RECORDS_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-records",
   NOTION_APP_LINK: "notion://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   NOTION_WEB_LINK: "https://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   COVER_BASE: "./covers/"
 };
+
+const USER_LABEL = { "我": "我", "老婆": "Ann" };
+const USER_SHORT = { "我": "我", "老婆": "A" };
 
 const FALLBACK_COURSES = [{"n":"世界冠軍的頭部鬆筋術｜解除痠痛 X 緊緻輪廓","p":"PressPlay","g":"健康","u":"https://www.pressplay.cc","c":"世界冠軍的頭部鬆筋術｜解除痠痛 X 緊緻輪廓.jpg"},{"n":"Heptabase 數位子彈筆記｜規劃人生、管理工作，取回人生主導權","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc"},{"n":"AI應用時代｜從邏輯思維到文字溝通，從職場複利到高效生活","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc"},{"n":"卡片盒筆記實戰課｜靈感捕捉到高效產出的知識管理系統","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc"},{"n":"爆發閱讀課｜五步驟打造閱讀IP，從有效閱讀到創造價值！","p":"PressPlay","g":"閱讀","u":"https://www.pressplay.cc"},{"n":"從零打造你的 AI Agent：n8n 入門與實戰課程","p":"PressPlay","g":"職涯生產力","u":"https://www.pressplay.cc"},{"n":"阿包醫生陪你養寶包｜爸媽必備幼兒養育健康知識","p":"PressPlay","g":"育兒","u":"https://www.pressplay.cc"},{"n":"企業財稅必修課｜五大模型帶你合法節稅、精準避險","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home"},{"n":"停止內耗｜阿德勒Ｘ完形心理學，帶你走出反覆卡關的人生","p":"知識衛星","g":"身心靈","u":"https://sat.cool/home"},{"n":"AI First 行動力｜帶你降本、增效、創造新商機","p":"知識衛星","g":"職涯生產力","u":"https://sat.cool/home"},{"n":"Notion AI 知識管理：打造比 ChatGPT 更直覺的助理","p":"Hahow - 好學校","g":"職涯生產力","u":"https://hahow.in"},{"n":"高效閱讀、有效輸出－學習實踐知識的技術","p":"Hahow - 好學校","g":"閱讀","u":"https://hahow.in"},{"n":"【迷你課】24 小時開始成為遠距工作者","p":"雷蒙三十","g":"職涯生產力","u":"https://academy.lifehacker.tw/"},{"n":"王永福教學的技術：人人搶著上你的課","p":"F學院","g":"職涯生產力","u":"https://funi.best"},{"n":"安定教養實戰課","p":"ShiFu 師父","g":"親子教育","u":"https://shifu.tw/"},{"n":"定期定額健身課","p":"ShiFu 師父","g":"健康","u":"https://shifu.tw/"},{"n":"專屬於你的家庭健身房","p":"大大讀書","g":"健康","u":"https://www.dada-master.com/"},{"n":"從零開始 AI 寫程式｜用 1% 關鍵知識消滅瑣事、解放創意","p":"Mosky AI","g":"職涯生產力","u":"https://learn.mosky.tw"},{"n":"30天打造立即可用的圖解力全攻略","p":"圖解力學院","g":"職涯生產力","u":"https://drawwin.kaik.io/"},{"n":"總校長的 AI 教育寶典｜掌握未來 30 年必備的聰明學習力","p":"word-up","g":"親子教育","u":"https://shop.wordup.com.tw/"}];
 
@@ -195,6 +207,7 @@ const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部', catSel='全部';
+let cloudRecords = store.get('lc_cloud_records', []);
 
 function setUser(u){user=u;store.set('lc_user',u);$('uMe').classList.toggle('on',u==='我');$('uWife').classList.toggle('on',u!=='我');renderRecords();renderStats();}
 (function initUser(){
@@ -224,8 +237,34 @@ async function loadCourses(){
     }
   }catch(e){}
 }
+async function loadRecords(){
+  if(!CONFIG.N8N_RECORDS_URL){$('recSrcInfo').innerHTML='<span class="dot"></span>僅本機紀錄';return;}
+  try{
+    const r=await fetch(CONFIG.N8N_RECORDS_URL,{cache:'no-store'});
+    let d=await r.json();
+    if(Array.isArray(d))d=d[0];
+    if(d&&Array.isArray(d.records)){
+      cloudRecords=d.records;
+      store.set('lc_cloud_records',cloudRecords);
+      $('recSrcInfo').innerHTML='<span class="dot"></span>已連線 Notion 學習紀錄('+cloudRecords.length+' 筆)';
+      $('recSrcInfo').classList.add('live');
+      renderRecords();renderStats();render();
+    }
+  }catch(e){
+    $('recSrcInfo').innerHTML='<span class="dot"></span>離線:顯示快取+本機紀錄';
+    $('recSrcInfo').classList.remove('live');
+  }
+}
 
-function courseMinutes(name){return records().filter(r=>r.course===name).reduce((s,r)=>s+r.minutes,0)}
+function localRecords(){return store.get('lc_records',[])}
+function records(){
+  const pending=localRecords().filter(r=>!r.synced);
+  const all=[...pending,...cloudRecords];
+  all.sort((a,b)=>String(b.start||'').localeCompare(String(a.start||'')));
+  return all;
+}
+
+function courseMinutes(name){return records().filter(r=>r.course===name).reduce((s,r)=>s+(Number(r.minutes)||0),0)}
 function buildChips(){
   const ps=['全部',...new Set(courses.map(c=>c.p).filter(Boolean))];
   $('platChips').innerHTML=ps.map(p=>`<button class="${p===platSel?'on':''}" onclick="platSel='${p.replace(/'/g,"\\'")}';buildChips();render()">${p}</button>`).join('');
@@ -238,6 +277,11 @@ function coverURL(c){
   if(c.c)return CONFIG.COVER_BASE+encodeURIComponent(c.c);
   return '';
 }
+function coverFallback(c){
+  const f=c.cf||c.c;
+  if(f)return CONFIG.COVER_BASE+encodeURIComponent(f);
+  return '';
+}
 function render(){
   const q=($('q').value||'').trim().toLowerCase();
   const list=courses.filter(c=>{
@@ -248,9 +292,10 @@ function render(){
   });
   $('cnt').textContent=list.length+' 門';
   $('grid').innerHTML=list.map((c)=>{
-    const cu=coverURL(c),m=courseMinutes(c.n);
+    const cu=coverURL(c),fb=coverFallback(c),m=courseMinutes(c.n);
+    const imgTag=cu?`<img loading="lazy" src="${cu}" alt="" data-fb="${fb&&fb!==cu?fb:''}" onerror="if(this.dataset.fb&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.fb}else{this.remove()}">`:'';
     return `<div class="cc">
-      <div class="cover">${cu?`<img loading="lazy" src="${cu}" alt="" onerror="this.remove()">`:''}<div class="ph">🎓</div></div>
+      <div class="cover">${imgTag}<div class="ph">🎓</div></div>
       <div class="body">
         <h3>${c.n}</h3>
         <div class="meta"><span class="tag">${c.p||''}</span>${c.g?`<span class="tag">${c.g}</span>`:''}${m?`<span class="mins">已學 ${m} 分鐘</span>`:''}</div>
@@ -292,7 +337,7 @@ function showDock(){
 function openEnd(){
   $('endName').textContent=active.course;
   $('endMin').value=Math.max(1,Math.round((Date.now()-new Date(active.start))/60000));
-  $('endUser').value=active.user;$('endNote').value='';
+  $('endUser').value=USER_LABEL[active.user]||active.user;$('endNote').value='';
   $('veil').classList.add('on');$('endSheet').classList.add('on');
 }
 function discardSession(){active=null;store.set('lc_active',null);clearInterval(tick);$('dock').classList.remove('on');closeSheet();toast('已放棄,未記錄');}
@@ -300,25 +345,31 @@ function saveRecord(){
   const rec={id:'r'+Date.now(),course:active.course,courseId:active.courseId,user:active.user,device:active.device,
     start:active.start,end:new Date().toISOString(),minutes:Math.max(0,parseInt($('endMin').value)||0),
     note:$('endNote').value.trim(),synced:false};
-  const rs=records();rs.unshift(rec);store.set('lc_records',rs);
+  const rs=localRecords();rs.unshift(rec);store.set('lc_records',rs);
   discardSession();
   renderRecords();renderStats();render();
   syncOne(rec);
 }
 
-function records(){return store.get('lc_records',[])}
 async function syncOne(rec){
   if(!CONFIG.N8N_LOG_URL){toast('已存在本機(尚未設定 Notion 同步)');return;}
   try{
     const r=await fetch(CONFIG.N8N_LOG_URL,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
-    if(r.ok){const rs=records();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);renderRecords();toast('已同步到 Notion ✓');return;}
+    if(r.ok){
+      const rs=localRecords();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);
+      cloudRecords.unshift({id:rec.id,course:rec.course,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note});
+      store.set('lc_cloud_records',cloudRecords);
+      renderRecords();toast('已同步到 Notion ✓');return;
+    }
     throw 0;
   }catch(e){toast('已存在本機,連上網後會再同步');}
 }
 async function syncPending(){
   if(!CONFIG.N8N_LOG_URL)return;
-  for(const rec of records().filter(r=>!r.synced))await syncOne(rec);
+  const pending=localRecords().filter(r=>!r.synced);
+  for(const rec of pending)await syncOne(rec);
+  if(pending.length)loadRecords();
 }
 function setRecFilter(w,btn){recFilterW=w;document.querySelectorAll('#recFilter button').forEach(b=>b.classList.toggle('on',b===btn));renderRecords();}
 function renderRecords(){
@@ -326,11 +377,11 @@ function renderRecords(){
   if(!rs.length){$('recList').innerHTML='<div class="empty">還沒有紀錄。到「課程」按「開始上課」,第一筆就會出現在這裡。</div>';return;}
   let html='',day='';
   for(const r of rs){
-    const d=r.start.slice(0,10);
+    const d=String(r.start||'').slice(0,10);
     if(d!==day){day=d;html+=`<div class="rday">${d}</div>`;}
-    html+=`<div class="rec"><div class="who ${r.user==='我'?'me':'wife'}">${r.user==='我'?'我':'妻'}</div>
-      <div class="rc"><b>${r.course}</b><span>${r.start.slice(11,16)}・${r.device}${r.note?'・'+r.note:''}</span></div>
-      <div><div class="rm">${r.minutes} 分</div><div class="sync ${r.synced?'ok':''}">${r.synced?'已同步✓':'待同步'}</div></div></div>`;
+    html+=`<div class="rec"><div class="who ${r.user==='我'?'me':'wife'}">${USER_SHORT[r.user]||'?'}</div>
+      <div class="rc"><b>${r.course}</b><span>${String(r.start||'').slice(11,16)}・${r.device||''}${r.note?'・'+r.note:''}</span></div>
+      <div><div class="rm">${r.minutes} 分</div><div class="sync ${r.synced===false?'':'ok'}">${r.synced===false?'待同步':'已同步✓'}</div></div></div>`;
   }
   $('recList').innerHTML=html;
 }
@@ -338,9 +389,9 @@ function renderStats(){
   const now=new Date(),wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));wk.setHours(0,0,0,0);
   const mine=records().filter(r=>r.user===user);
   const w=mine.filter(r=>new Date(r.start)>=wk);
-  $('stWeekMin').textContent=w.reduce((s,r)=>s+r.minutes,0);
+  $('stWeekMin').textContent=w.reduce((s,r)=>s+(Number(r.minutes)||0),0);
   $('stWeekCnt').textContent=w.length;
-  $('stTotalHr').textContent=(mine.reduce((s,r)=>s+r.minutes,0)/60).toFixed(1);
+  $('stTotalHr').textContent=(mine.reduce((s,r)=>s+(Number(r.minutes)||0),0)/60).toFixed(1);
 }
 
 function switchTab(t){$('tabC').classList.toggle('on',t==='c');$('tabR').classList.toggle('on',t==='r');$('paneC').classList.toggle('on',t==='c');$('paneR').classList.toggle('on',t==='r');}
@@ -351,7 +402,8 @@ $('today').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'
   const a=store.get('lc_active',null);
   if(a){active=a;showDock();}
   renderRecords();renderStats();
-  loadCourses();syncPending();
+  loadCourses();loadRecords();syncPending();
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 })();
 </script>
 </body></html>
