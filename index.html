@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v4</title>
+<title>學習中心 v5</title>
 <meta name="theme-color" content="#16294e">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -56,7 +56,9 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--mut)}
 .meta .tag{background:#F4F4F2;border-radius:10px;padding:1px 9px}
 .mins{font-size:11.5px;color:var(--amber);font-weight:600}
-.cc .go{margin-top:auto;border:none;background:var(--navy);color:#fff;border-radius:9px;padding:10px;font-size:15px;font-weight:700;letter-spacing:.05em}
+.cc .btnrow{margin-top:auto;display:flex;gap:8px}
+.cc .note{border:1.5px solid var(--bd);background:#EFF3FA;border-radius:9px;padding:10px 12px;font-size:16px;flex:none}
+.cc .go{flex:1;border:none;background:var(--navy);color:#fff;border-radius:9px;padding:10px;font-size:15px;font-weight:700;letter-spacing:.05em}
 .cc .go:active{transform:scale(.98)}
 .empty{text-align:center;color:var(--mut);padding:40px 0}
 .rday{margin:16px 0 6px;font-size:13px;font-weight:700;color:var(--mut)}
@@ -151,7 +153,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
     <div class="no">1</div>
     <div class="sc">
       <b>開啟 Notion 錄音</b>
-      <p>跳到「開始聽課」頁後,按下 AI 會議記錄的錄音鈕,再切回來。</p>
+      <p id="notionStepDesc">跳到<b>本課程的筆記頁</b>後,按下 AI 會議記錄的錄音鈕,再切回來。錄音、逐字稿與 AI 摘要都會自動歸檔在該課筆記頁。</p>
       <a class="btn ghost" id="btnNotion" href="#" target="_blank" rel="noopener">開啟 Notion ↗</a>
       <div class="tip" id="tipDevice"></div>
       <div class="tip">🚗 開車聽課:請在<b>出發前停妥時</b>完成所有步驟並開始播放,行車中請勿操作手機。</div>
@@ -175,7 +177,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
     <div class="field"><label>這次上了(分鐘)</label><input id="endMin" type="number" min="0" inputmode="numeric"></div>
     <div class="field"><label>學習者</label><input id="endUser" readonly></div>
   </div>
-  <div class="field"><label>備註(選填)</label><textarea id="endNote" rows="2" placeholder="這節課的重點、進度…"></textarea></div>
+  <div class="field"><label>備註(選填,會寫進課程筆記頁的學習日誌)</label><textarea id="endNote" rows="2" placeholder="這節課的重點、進度…"></textarea></div>
   <button class="btn main" onclick="saveRecord()">儲存紀錄 ✓</button>
   <button class="cancel" onclick="discardSession()">放棄這筆,不記錄</button>
 </div>
@@ -295,17 +297,27 @@ function render(){
   $('grid').innerHTML=list.map((c)=>{
     const cu=coverURL(c),fb=coverFallback(c),m=courseMinutes(c.n);
     const imgTag=cu?`<img loading="lazy" src="${cu}" alt="" data-fb="${fb&&fb!==cu?fb:''}" onerror="if(this.dataset.fb&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.fb}else{this.remove()}">`:'';
+    const i=courses.indexOf(c);
     return `<div class="cc">
       <div class="cover">${imgTag}<div class="ph">🎓</div></div>
       <div class="body">
         <h3>${c.n}</h3>
         <div class="meta"><span class="tag">${c.p||''}</span>${c.g?`<span class="tag">${c.g}</span>`:''}${m?`<span class="mins">已學 ${m} 分鐘</span>`:''}</div>
-        <button class="go" onclick="openSheet(${courses.indexOf(c)})">開始上課</button>
+        <div class="btnrow">${c.np?`<button class="note" title="開啟課程筆記" onclick="openNote(${i})">📝</button>`:''}<button class="go" onclick="openSheet(${i})">開始上課</button></div>
       </div></div>`;
   }).join('')||'<div class="empty">沒有符合的課程</div>';
 }
 
 let sheetCourse=null;
+function notionLinks(c){
+  if(c&&c.np){const id=String(c.np).replace(/-/g,'');return {app:'notion://www.notion.so/'+id, web:'https://www.notion.so/'+id};}
+  return {app:CONFIG.NOTION_APP_LINK, web:CONFIG.NOTION_WEB_LINK};
+}
+function openNote(i){
+  const L=notionLinks(courses[i]);
+  location.href=L.app;
+  setTimeout(()=>window.open(L.web,'_blank'),1200);
+}
 function deviceName(){const u=navigator.userAgent;if(/iPad|Tablet/i.test(u)||(navigator.maxTouchPoints>1&&/Macintosh/.test(u)))return '平板';if(/Mobi|iPhone|Android/i.test(u))return '手機';return '電腦';}
 function openSheet(i){
   sheetCourse=courses[i];
@@ -314,8 +326,9 @@ function openSheet(i){
   $('tipDevice').innerHTML=dev==='電腦'
     ?'💻 電腦上課:Notion 桌面版可直接錄系統聲音,<b>戴耳機也錄得到</b>。'
     :'📢 '+dev+'上課:請<b>用喇叭外放</b>課程聲音,戴耳機 Notion 會錄不到;環境盡量安靜。';
-  $('btnNotion').href=CONFIG.NOTION_APP_LINK;
-  $('btnNotion').onclick=e=>{e.preventDefault();location.href=CONFIG.NOTION_APP_LINK;setTimeout(()=>window.open(CONFIG.NOTION_WEB_LINK,'_blank'),1200);};
+  const L=notionLinks(sheetCourse);
+  $('btnNotion').href=L.app;
+  $('btnNotion').onclick=e=>{e.preventDefault();location.href=L.app;setTimeout(()=>window.open(L.web,'_blank'),1200);};
   $('btnGo').onclick=startSession;
   $('veil').classList.add('on');$('sheet').classList.add('on');
 }
