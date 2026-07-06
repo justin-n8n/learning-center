@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v6</title>
+<title>學習中心 v6.1</title>
 <meta name="theme-color" content="#16294e">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -227,9 +227,10 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
 
 <script>
 const CONFIG = {
-  N8N_COURSES_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-courses",
-  N8N_LOG_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-log",
-  N8N_RECORDS_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-records",
+  N8N_COURSES_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-courses-t7k4q9",
+  N8N_LOG_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-log-w3m8r5",
+  N8N_RECORDS_URL: "https://n8n-justin8206-new.zeabur.app/webhook/learning-center-records-e6p2z7",
+  SYNC_TOKEN: "LC-8kQz3WvN-2026",
   NOTION_APP_LINK: "notion://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   NOTION_WEB_LINK: "https://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   COVER_BASE: "./covers/"
@@ -446,7 +447,7 @@ async function syncOne(rec){
   if(!CONFIG.N8N_LOG_URL){toast('已存在本機(尚未設定 Notion 同步)');return;}
   try{
     const r=await fetch(CONFIG.N8N_LOG_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
+      body:JSON.stringify({token:CONFIG.SYNC_TOKEN,course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
     if(r.ok){
       const rs=localRecords();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);
       cloudRecords.unshift({id:rec.id,course:rec.course,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note});
