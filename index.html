@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v5</title>
+<title>學習中心 v6</title>
 <meta name="theme-color" content="#16294e">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -13,7 +13,15 @@
 :root{
   --navy:#16294e; --navy2:#2E74B5; --amber:#D97706; --amber-bg:#FEF3C7;
   --bg:#FAFAF9; --card:#FFF; --bd:#E5E5E0; --ink:#1F2937; --mut:#6B7280;
-  --ok:#15803D; --danger:#B91C1C; --r:12px;
+  --ok:#15803D; --danger:#B91C1C; --ghost:#EFF3FA; --tagbg:#F4F4F2; --r:12px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0F172A; --card:#1E293B; --bd:#334155; --ink:#E2E8F0; --mut:#94A3B8;
+    --amber-bg:#3B2F14; --ghost:#27364D; --tagbg:#0F2036; --ok:#4ADE80;
+  }
+  .tip{color:#FCD34D}
+  .cc .cover{background:linear-gradient(135deg,#1E2C44,#2C2A22)}
 }
 *{box-sizing:border-box}
 body{margin:0;font:15px/1.6 "PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:90px}
@@ -33,34 +41,54 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .stat span{font-size:11px;opacity:.8}
 .tabs{display:flex;gap:2px;margin:14px 0 0;border-bottom:2px solid var(--bd)}
 .tabs button{flex:1;max-width:160px;background:none;border:none;padding:10px;font-size:15px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
-.tabs button.on{color:var(--navy);border-color:var(--navy)}
+.tabs button.on{color:var(--navy2);border-color:var(--navy2)}
 .pane{display:none;padding:14px 0}
 .pane.on{display:block}
 .search{display:flex;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:2px 12px;margin-bottom:10px}
-.search input{flex:1;border:none;outline:none;font:inherit;padding:9px 0;background:none}
+.search input{flex:1;border:none;outline:none;font:inherit;padding:9px 0;background:none;color:var(--ink)}
 .search span{font-size:12px;color:var(--mut);white-space:nowrap}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
 .chips button{white-space:nowrap;border:1.5px solid var(--bd);background:var(--card);border-radius:16px;padding:5px 13px;font-size:13px;color:var(--ink)}
-.chips button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chips button.on{background:var(--navy2);border-color:var(--navy2);color:#fff}
 .chips-label{font-size:11px;color:var(--mut);margin:4px 0 2px;font-weight:600}
 .src{font-size:12px;color:var(--mut);margin:2px 0 10px}
 .src .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--mut);vertical-align:1px}
 .src.live .dot{background:var(--ok)}
+.cont{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;margin-bottom:4px}
+.cc2{min-width:240px;max-width:280px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:none}
+.cc2 b{font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.cc2 span{font-size:11px;color:var(--mut)}
+.cc2 button{border:none;background:var(--amber);color:#fff;border-radius:8px;padding:9px;font-weight:700;font-size:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.sk{height:230px;border-radius:var(--r);background:linear-gradient(90deg,var(--card) 25%,var(--bd) 50%,var(--card) 75%);background-size:200% 100%;animation:shim 1.2s infinite}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .cc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.cc.done{opacity:.55}
+.cc.done .cover img{filter:grayscale(1)}
 .cc .cover{aspect-ratio:16/9;background:linear-gradient(135deg,#DCE4F0,#F0EAE0);position:relative}
 .cc .cover img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
 .cc .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#9aa8c0}
 .cc .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
 .cc h3{margin:0;font-size:14px;line-height:1.45;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
 .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--mut)}
-.meta .tag{background:#F4F4F2;border-radius:10px;padding:1px 9px}
+.meta .tag{background:var(--tagbg);border-radius:10px;padding:1px 9px}
+.tag.st-done{background:rgba(21,128,61,.15);color:var(--ok);font-weight:700}
+.tag.st-doing{background:rgba(217,119,6,.18);color:var(--amber);font-weight:700}
 .mins{font-size:11.5px;color:var(--amber);font-weight:600}
+.pb{height:4px;background:var(--bd);border-radius:2px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--ok);border-radius:2px}
 .cc .btnrow{margin-top:auto;display:flex;gap:8px}
-.cc .note{border:1.5px solid var(--bd);background:#EFF3FA;border-radius:9px;padding:10px 12px;font-size:16px;flex:none}
-.cc .go{flex:1;border:none;background:var(--navy);color:#fff;border-radius:9px;padding:10px;font-size:15px;font-weight:700;letter-spacing:.05em}
+.cc .note{border:1.5px solid var(--bd);background:var(--ghost);border-radius:9px;padding:10px 12px;font-size:16px;flex:none}
+.cc .go{flex:1;border:none;background:var(--navy2);color:#fff;border-radius:9px;padding:10px;font-size:15px;font-weight:700;letter-spacing:.05em}
 .cc .go:active{transform:scale(.98)}
 .empty{text-align:center;color:var(--mut);padding:40px 0}
+.chartbox{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.stk{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px}
+.stk small{font-weight:400;color:var(--mut);margin-left:8px}
+.chart{display:flex;align-items:flex-end;gap:5px;height:70px}
+.chart .bar{flex:1;background:var(--navy2);border-radius:3px 3px 0 0;min-height:3px}
+.chartlbl{display:flex;gap:5px;font-size:10px;color:var(--mut);margin-top:4px}
+.chartlbl span{flex:1;text-align:center;white-space:nowrap;overflow:hidden}
 .rday{margin:16px 0 6px;font-size:13px;font-weight:700;color:var(--mut)}
 .rec{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
 .rec .who{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex:none}
@@ -68,7 +96,7 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .rec .rc{flex:1;min-width:0}
 .rec .rc b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec .rc span{font-size:12px;color:var(--mut)}
-.rec .rm{font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rec .rm{font-weight:700;color:var(--navy2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .rec .sync{font-size:10px;color:var(--mut)}
 .rec .sync.ok{color:var(--ok)}
 .veil{position:fixed;inset:0;background:rgba(20,30,50,.5);display:none;z-index:40}
@@ -79,12 +107,12 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .sheet h2{margin:0 0 2px;font-size:17px}
 .sheet .cname{color:var(--mut);font-size:13px;margin:0 0 14px;line-height:1.5}
 .step{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--bd)}
-.step .no{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none}
+.step .no{width:26px;height:26px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none}
 .step .sc{flex:1}
 .step .sc b{font-size:15px}
 .step .sc p{margin:3px 0 8px;font-size:12.5px;color:var(--mut)}
 .btn{display:inline-block;border:none;border-radius:9px;padding:10px 16px;font-size:14.5px;font-weight:700;text-decoration:none;text-align:center}
-.btn.ghost{background:#EFF3FA;color:var(--navy)}
+.btn.ghost{background:var(--ghost);color:var(--navy2)}
 .btn.main{background:var(--amber);color:#fff;width:100%;padding:13px;font-size:16px}
 .tip{background:var(--amber-bg);border-left:3px solid var(--amber);border-radius:6px;padding:8px 10px;font-size:12.5px;color:#92400E;margin:6px 0}
 .sheet .cancel{width:100%;margin-top:10px;background:none;border:none;color:var(--mut);padding:8px;font-size:14px}
@@ -99,9 +127,9 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .dock .end{border:none;background:var(--amber);color:#fff;border-radius:9px;padding:10px 16px;font-size:15px;font-weight:700;flex:none}
 .field{margin:12px 0}
 .field label{display:block;font-size:13px;color:var(--mut);margin-bottom:5px}
-.field input,.field textarea{width:100%;border:1px solid var(--bd);border-radius:9px;padding:10px;font:inherit;background:var(--bg)}
+.field input,.field textarea{width:100%;border:1px solid var(--bd);border-radius:9px;padding:10px;font:inherit;background:var(--bg);color:var(--ink)}
 .row2{display:flex;gap:10px}.row2>*{flex:1}
-.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;z-index:99;display:none;max-width:90vw}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 18px;font-size:14px;z-index:99;display:none;max-width:90vw}
 button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offset:2px}
 </style></head><body>
 
@@ -127,15 +155,22 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
   </div>
   <div id="paneC" class="pane on">
     <div class="src" id="srcInfo"><span class="dot"></span>載入中…</div>
+    <div id="contWrap" style="display:none">
+      <div class="chips-label">▶ 繼續上課</div>
+      <div class="cont" id="contRow"></div>
+    </div>
     <div class="search"><input id="q" placeholder="搜尋課程名稱、平台、性質…" oninput="render()"><span id="cnt"></span></div>
     <div class="chips-label">平台</div>
     <div class="chips" id="platChips"></div>
     <div class="chips-label">性質</div>
     <div class="chips" id="catChips"></div>
-    <div class="grid" id="grid"></div>
+    <div class="chips-label">排序</div>
+    <div class="chips" id="sortChips"></div>
+    <div class="grid" id="grid"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>
   </div>
   <div id="paneR" class="pane">
     <div class="src" id="recSrcInfo"><span class="dot"></span>載入中…</div>
+    <div class="chartbox" id="chartBox" style="display:none"></div>
     <div class="chips" id="recFilter">
       <button class="on" data-w="all" onclick="setRecFilter('all',this)">全部</button>
       <button data-w="我" onclick="setRecFilter('我',this)">我</button>
@@ -208,7 +243,7 @@ const FALLBACK_COURSES = [{"n":"世界冠軍的頭部鬆筋術｜解除痠痛 X 
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
-let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部', catSel='全部';
+let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部', catSel='全部', sortSel='new';
 let cloudRecords = store.get('lc_cloud_records', []);
 
 function setUser(u){user=u;store.set('lc_user',u);$('uMe').classList.toggle('on',u==='我');$('uWife').classList.toggle('on',u!=='我');renderRecords();renderStats();}
@@ -267,11 +302,28 @@ function records(){
 }
 
 function courseMinutes(name){return records().filter(r=>r.course===name).reduce((s,r)=>s+(Number(r.minutes)||0),0)}
+function lastStudy(name){const r=records().find(x=>x.course===name);return r?String(r.start||''):'';}
+function isDone(c){return c.st==='已完成'||c.st==='略過不學';}
+function pgOf(c){
+  let p=Number(c.pg)||0;
+  if(p>0&&p<=1)p=p*100;
+  if(p<=0&&c.eh){p=Math.min(100,courseMinutes(c.n)/(Number(c.eh)*60)*100);}
+  return Math.max(0,Math.min(100,Math.round(p)));
+}
+function stTag(c){
+  if(!c.st)return '';
+  if(isDone(c))return `<span class="tag st-done">✓ ${c.st}</span>`;
+  if(c.st==='學習中'||c.st==='進行中'||c.st==='暫停')return `<span class="tag st-doing">${c.st}</span>`;
+  return `<span class="tag">${c.st}</span>`;
+}
+
+const SORTS=[['new','最新購買'],['recent','最近上課'],['learned','已學最多'],['todo','未開始優先']];
 function buildChips(){
   const ps=['全部',...new Set(courses.map(c=>c.p).filter(Boolean))];
   $('platChips').innerHTML=ps.map(p=>`<button class="${p===platSel?'on':''}" onclick="platSel='${p.replace(/'/g,"\\'")}';buildChips();render()">${p}</button>`).join('');
   const cats=['全部',...new Set(courses.flatMap(c=>(c.g||'').split('、').map(x=>x.trim())).filter(Boolean))];
   $('catChips').innerHTML=cats.map(g=>`<button class="${g===catSel?'on':''}" onclick="catSel='${g.replace(/'/g,"\\'")}';buildChips();render()">${g}</button>`).join('');
+  $('sortChips').innerHTML=SORTS.map(([k,l])=>`<button class="${k===sortSel?'on':''}" onclick="sortSel='${k}';buildChips();render()">${l}</button>`).join('');
 }
 function coverURL(c){
   if(c.cv&&/^https?:/.test(c.cv))return c.cv;
@@ -285,27 +337,50 @@ function coverFallback(c){
   if(f)return CONFIG.COVER_BASE+encodeURIComponent(f);
   return '';
 }
+function cardHTML(c){
+  const cu=coverURL(c),fb=coverFallback(c),m=courseMinutes(c.n),pv=pgOf(c);
+  const imgTag=cu?`<img loading="lazy" src="${cu}" alt="" data-fb="${fb&&fb!==cu?fb:''}" onerror="if(this.dataset.fb&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.fb}else{this.remove()}">`:'';
+  const i=courses.indexOf(c);
+  return `<div class="cc${isDone(c)?' done':''}">
+    <div class="cover">${imgTag}<div class="ph">🎓</div></div>
+    <div class="body">
+      <h3>${c.n}</h3>
+      <div class="meta"><span class="tag">${c.p||''}</span>${stTag(c)}${m?`<span class="mins">已學 ${m} 分</span>`:''}</div>
+      ${pv?`<div class="pb" title="進度 ${pv}%"><i style="width:${pv}%"></i></div>`:''}
+      <div class="btnrow">${c.np?`<button class="note" title="開啟課程筆記" onclick="openNote(${i})">📝</button>`:''}<button class="go" onclick="openSheet(${i})">開始上課</button></div>
+    </div></div>`;
+}
 function render(){
   const q=($('q').value||'').trim().toLowerCase();
-  const list=courses.filter(c=>{
+  let list=courses.filter(c=>{
     if(platSel!=='全部'&&c.p!==platSel)return false;
     if(catSel!=='全部'&&!(c.g||'').split('、').map(x=>x.trim()).includes(catSel))return false;
     if(q&&!((c.n+c.p+(c.g||'')).toLowerCase().includes(q)))return false;
     return true;
   });
+  if(sortSel==='recent'){list=[...list].sort((a,b)=>lastStudy(b.n).localeCompare(lastStudy(a.n)));}
+  else if(sortSel==='learned'){list=[...list].sort((a,b)=>courseMinutes(b.n)-courseMinutes(a.n));}
+  else if(sortSel==='todo'){list=[...list].sort((a,b)=>((a.st==='未開始'||!a.st)?0:1)-((b.st==='未開始'||!b.st)?0:1));}
+  list=[...list].sort((a,b)=>(isDone(a)?1:0)-(isDone(b)?1:0));
   $('cnt').textContent=list.length+' 門';
-  $('grid').innerHTML=list.map((c)=>{
-    const cu=coverURL(c),fb=coverFallback(c),m=courseMinutes(c.n);
-    const imgTag=cu?`<img loading="lazy" src="${cu}" alt="" data-fb="${fb&&fb!==cu?fb:''}" onerror="if(this.dataset.fb&&!this.dataset.f){this.dataset.f=1;this.src=this.dataset.fb}else{this.remove()}">`:'';
-    const i=courses.indexOf(c);
-    return `<div class="cc">
-      <div class="cover">${imgTag}<div class="ph">🎓</div></div>
-      <div class="body">
-        <h3>${c.n}</h3>
-        <div class="meta"><span class="tag">${c.p||''}</span>${c.g?`<span class="tag">${c.g}</span>`:''}${m?`<span class="mins">已學 ${m} 分鐘</span>`:''}</div>
-        <div class="btnrow">${c.np?`<button class="note" title="開啟課程筆記" onclick="openNote(${i})">📝</button>`:''}<button class="go" onclick="openSheet(${i})">開始上課</button></div>
-      </div></div>`;
-  }).join('')||'<div class="empty">沒有符合的課程</div>';
+  $('grid').innerHTML=list.map(cardHTML).join('')||'<div class="empty">沒有符合的課程</div>';
+  renderContinue();
+}
+function renderContinue(){
+  const seen=new Set(),picks=[];
+  for(const r of records()){
+    if(seen.has(r.course))continue;
+    seen.add(r.course);
+    const i=courses.findIndex(c=>c.n===r.course);
+    if(i>=0&&!isDone(courses[i]))picks.push({i,last:String(r.start||'').slice(0,10),min:courseMinutes(r.course)});
+    if(picks.length>=2)break;
+  }
+  if(!picks.length){$('contWrap').style.display='none';return;}
+  $('contWrap').style.display='';
+  $('contRow').innerHTML=picks.map(p=>{
+    const c=courses[p.i];
+    return `<div class="cc2"><b>${c.n}</b><span>上次:${p.last}・累計 ${p.min} 分鐘</span><button onclick="openSheet(${p.i})">▶ 繼續上課</button></div>`;
+  }).join('');
 }
 
 let sheetCourse=null;
@@ -354,13 +429,15 @@ function openEnd(){
   $('endUser').value=USER_LABEL[active.user]||active.user;$('endNote').value='';
   $('veil').classList.add('on');$('endSheet').classList.add('on');
 }
-function discardSession(){active=null;store.set('lc_active',null);clearInterval(tick);$('dock').classList.remove('on');closeSheet();toast('已放棄,未記錄');}
+function clearSession(){active=null;store.set('lc_active',null);clearInterval(tick);$('dock').classList.remove('on');closeSheet();}
+function discardSession(){clearSession();toast('已放棄,未記錄');}
 function saveRecord(){
   const rec={id:'r'+Date.now(),course:active.course,courseId:active.courseId,user:active.user,device:active.device,
     start:active.start,end:new Date().toISOString(),minutes:Math.max(0,parseInt($('endMin').value)||0),
     note:$('endNote').value.trim(),synced:false};
   const rs=localRecords();rs.unshift(rec);store.set('lc_records',rs);
-  discardSession();
+  clearSession();
+  toast('已儲存,同步中…');
   renderRecords();renderStats();render();
   syncOne(rec);
 }
@@ -374,7 +451,7 @@ async function syncOne(rec){
       const rs=localRecords();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);
       cloudRecords.unshift({id:rec.id,course:rec.course,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note});
       store.set('lc_cloud_records',cloudRecords);
-      renderRecords();toast('已同步到 Notion ✓');return;
+      renderRecords();toast('已同步到 Notion ✓ 🎉');return;
     }
     throw 0;
   }catch(e){toast('已存在本機,連上網後會再同步');}
@@ -386,7 +463,36 @@ async function syncPending(){
   if(pending.length)loadRecords();
 }
 function setRecFilter(w,btn){recFilterW=w;document.querySelectorAll('#recFilter button').forEach(b=>b.classList.toggle('on',b===btn));renderRecords();}
+function localDay(s){
+  const d=new Date(s);
+  if(isNaN(d))return String(s||'').slice(0,10);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function renderChart(){
+  const rs=records().filter(r=>recFilterW==='all'||r.user===recFilterW);
+  if(!rs.length){$('chartBox').style.display='none';return;}
+  const now=new Date();
+  const mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));mon.setHours(0,0,0,0);
+  const weeks=[];
+  for(let i=7;i>=0;i--){
+    const ws=new Date(mon);ws.setDate(mon.getDate()-i*7);
+    const we=new Date(ws);we.setDate(ws.getDate()+7);
+    const mins=rs.filter(r=>{const d=new Date(r.start);return d>=ws&&d<we;}).reduce((s,r)=>s+(Number(r.minutes)||0),0);
+    weeks.push({label:(ws.getMonth()+1)+'/'+ws.getDate(),mins});
+  }
+  const max=Math.max(...weeks.map(w=>w.mins),1);
+  const days=new Set(rs.map(r=>localDay(r.start)));
+  let streak=0;const cur=new Date();
+  if(!days.has(localDay(cur)))cur.setDate(cur.getDate()-1);
+  while(days.has(localDay(cur))){streak++;cur.setDate(cur.getDate()-1);}
+  $('chartBox').style.display='';
+  $('chartBox').innerHTML=
+    `<div class="stk">🔥 連續學習 ${streak} 天<small>近 8 週分鐘數${recFilterW==='all'?'(兩人合計)':'('+(USER_LABEL[recFilterW]||recFilterW)+')'}</small></div>`+
+    `<div class="chart">${weeks.map(w=>`<div class="bar" title="${w.label} 週:${w.mins} 分鐘" style="height:${Math.max(4,Math.round(w.mins/max*100))}%"></div>`).join('')}</div>`+
+    `<div class="chartlbl">${weeks.map(w=>`<span>${w.label}</span>`).join('')}</div>`;
+}
 function renderRecords(){
+  renderChart();
   const rs=records().filter(r=>recFilterW==='all'||r.user===recFilterW);
   if(!rs.length){$('recList').innerHTML='<div class="empty">還沒有紀錄。到「課程」按「開始上課」,第一筆就會出現在這裡。</div>';return;}
   let html='',day='';
