@@ -266,7 +266,7 @@ async function loadCourses(){
   else useCourses(FALLBACK_COURSES,'內建課程資料',false);
   if(!CONFIG.N8N_COURSES_URL) return;
   try{
-    const r=await fetch(CONFIG.N8N_COURSES_URL,{cache:'no-store'});
+    const r=await fetch(CONFIG.N8N_COURSES_URL+'?token='+encodeURIComponent(CONFIG.SYNC_TOKEN),{cache:'no-store'});
     let d=await r.json();
     if(Array.isArray(d))d=d[0];
     if(d&&d.courses&&d.courses.length){
@@ -278,7 +278,7 @@ async function loadCourses(){
 async function loadRecords(){
   if(!CONFIG.N8N_RECORDS_URL){$('recSrcInfo').innerHTML='<span class="dot"></span>僅本機紀錄';return;}
   try{
-    const r=await fetch(CONFIG.N8N_RECORDS_URL,{cache:'no-store'});
+    const r=await fetch(CONFIG.N8N_RECORDS_URL+'?token='+encodeURIComponent(CONFIG.SYNC_TOKEN),{cache:'no-store'});
     let d=await r.json();
     if(Array.isArray(d))d=d[0];
     if(d&&Array.isArray(d.records)){
