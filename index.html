@@ -132,6 +132,7 @@ header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;pa
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 18px;font-size:14px;z-index:99;display:none;max-width:90vw}
 button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offset:2px}
 </style></head><body>
+<div id="tokenBar" style="display:none;background:var(--ink);color:var(--bg);padding:12px 16px;font-size:14px;line-height:1.5"><div id="tokenMsg" style="margin-bottom:8px"></div><input id="tokenInput" type="password" autocomplete="off" placeholder="同步通行碼" style="padding:8px 10px;border-radius:8px;border:0;font-size:16px;max-width:60%"> <button onclick="saveToken()" style="padding:8px 14px;border-radius:8px;border:0;font-size:14px;cursor:pointer">儲存</button></div>
 
 <header><div class="wrap">
   <div class="hrow">
@@ -230,7 +231,6 @@ const CONFIG = {
   N8N_COURSES_URL: "https://n8n.justinlevelup.com/webhook/learning-center-courses-t7k4q9",
   N8N_LOG_URL: "https://n8n.justinlevelup.com/webhook/learning-center-log-w3m8r5",
   N8N_RECORDS_URL: "https://n8n.justinlevelup.com/webhook/learning-center-records-e6p2z7",
-  SYNC_TOKEN: "LC-8kQz3WvN-2026",
   NOTION_APP_LINK: "notion://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   NOTION_WEB_LINK: "https://www.notion.so/2b1a897c12a745d9af795c6aa2634637",
   COVER_BASE: "./covers/"
@@ -243,6 +243,11 @@ const FALLBACK_COURSES = [{"n":"世界冠軍的頭部鬆筋術｜解除痠痛 X 
 
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let tokenBad=false;
+const getToken=()=>store.get('lc_sync_token','');
+function showTokenBar(msg){$('tokenMsg').textContent=msg;$('tokenBar').style.display='block';}
+function tokenFail(){tokenBad=true;showTokenBar('同步失敗：通行碼可能不對，請重新輸入。新紀錄會先留在這台裝置，不會遺失。');}
+function saveToken(){const v=$('tokenInput').value.trim();if(!v)return;store.set('lc_sync_token',v);tokenBad=false;$('tokenInput').value='';$('tokenBar').style.display='none';loadCourses();loadRecords();syncPending();}
 
 let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部', catSel='全部', sortSel='new';
 let cloudRecords = store.get('lc_cloud_records', []);
@@ -264,9 +269,10 @@ async function loadCourses(){
   const cached=store.get('lc_courses_cache',null);
   if(cached&&cached.courses) useCourses(cached.courses,'快取資料('+cached.at.slice(0,10)+')',false);
   else useCourses(FALLBACK_COURSES,'內建課程資料',false);
-  if(!CONFIG.N8N_COURSES_URL) return;
+  if(!CONFIG.N8N_COURSES_URL||!getToken()||tokenBad) return;
   try{
-    const r=await fetch(CONFIG.N8N_COURSES_URL+'?token='+encodeURIComponent(CONFIG.SYNC_TOKEN),{cache:'no-store'});
+    const r=await fetch(CONFIG.N8N_COURSES_URL+'?token='+encodeURIComponent(getToken()),{cache:'no-store'});
+    if(r.status>=400){tokenFail();return;}
     let d=await r.json();
     if(Array.isArray(d))d=d[0];
     if(d&&d.courses&&d.courses.length){
@@ -277,8 +283,10 @@ async function loadCourses(){
 }
 async function loadRecords(){
   if(!CONFIG.N8N_RECORDS_URL){$('recSrcInfo').innerHTML='<span class="dot"></span>僅本機紀錄';return;}
+  if(!getToken()||tokenBad){$('recSrcInfo').innerHTML='<span class="dot"></span>未同步:顯示快取+本機紀錄';return;}
   try{
-    const r=await fetch(CONFIG.N8N_RECORDS_URL+'?token='+encodeURIComponent(CONFIG.SYNC_TOKEN),{cache:'no-store'});
+    const r=await fetch(CONFIG.N8N_RECORDS_URL+'?token='+encodeURIComponent(getToken()),{cache:'no-store'});
+    if(r.status>=400){tokenFail();$('recSrcInfo').innerHTML='<span class="dot"></span>未同步:顯示快取+本機紀錄';return;}
     let d=await r.json();
     if(Array.isArray(d))d=d[0];
     if(d&&Array.isArray(d.records)){
@@ -445,20 +453,22 @@ function saveRecord(){
 
 async function syncOne(rec){
   if(!CONFIG.N8N_LOG_URL){toast('已存在本機(尚未設定 Notion 同步)');return;}
+  if(!getToken()||tokenBad){toast('已存在本機,輸入通行碼後會同步');return;}
   try{
     const r=await fetch(CONFIG.N8N_LOG_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:CONFIG.SYNC_TOKEN,course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
+      body:JSON.stringify({token:getToken(),course:rec.course,courseId:rec.courseId,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note})});
     if(r.ok){
       const rs=localRecords();const t=rs.find(x=>x.id===rec.id);if(t)t.synced=true;store.set('lc_records',rs);
       cloudRecords.unshift({id:rec.id,course:rec.course,user:rec.user,device:rec.device,start:rec.start,end:rec.end,minutes:rec.minutes,note:rec.note});
       store.set('lc_cloud_records',cloudRecords);
       renderRecords();toast('已同步到 Notion ✓ 🎉');return;
     }
+    if(r.status>=400)tokenFail();
     throw 0;
   }catch(e){toast('已存在本機,連上網後會再同步');}
 }
 async function syncPending(){
-  if(!CONFIG.N8N_LOG_URL)return;
+  if(!CONFIG.N8N_LOG_URL||!getToken()||tokenBad)return;
   const pending=localRecords().filter(r=>!r.synced);
   for(const rec of pending)await syncOne(rec);
   if(pending.length)loadRecords();
@@ -523,6 +533,7 @@ $('today').textContent=new Date().toLocaleDateString('zh-TW',{month:'long',day:'
   const a=store.get('lc_active',null);
   if(a){active=a;showDock();}
   renderRecords();renderStats();
+  if(!getToken())showTokenBar('請輸入同步通行碼（每台裝置只要輸入一次）。');
   loadCourses();loadRecords();syncPending();
   if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 })();
