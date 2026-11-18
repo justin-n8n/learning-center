@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-TW"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Ann 的學習中心</title>
+<meta name="theme-color" content="#16294e">
+<!-- v6.3：Ann 專用入口。網址本身就是 Ann 的，加到主畫面不會變回共用網址 -->
+<link rel="manifest" href="./manifest-wife.json">
+<link rel="icon" href="./icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="學習中心">
+<script>
+/* 從主畫面打開（全螢幕）時直接進 Ann 的學習中心 */
+(function(){
+  var standalone = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if (standalone) location.replace('./index.html?user=wife');
+})();
+</script>
+<style>
+:root{--bg:#FAFAF9;--ink:#16294e;--card:#fff;--muted:#555;--accent:#DB2877}
+@media (prefers-color-scheme: dark){:root{--bg:#111827;--ink:#E5E7EB;--card:#1F2937;--muted:#9CA3AF}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;line-height:1.7}
+.wrap{max-width:520px;margin:0 auto;padding:32px 16px}
+h1{font-size:24px;margin:0 0 4px}
+p.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border-radius:14px;padding:18px 18px 8px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:20px}
+.card ol{padding-left:22px;margin:8px 0}
+.card li{margin-bottom:8px}
+a.go{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-size:17px;font-weight:600;padding:14px;border-radius:12px}
+</style>
+</head><body>
+<div class="wrap">
+  <h1>📚 Ann 的學習中心</h1>
+  <p class="sub">這是 Ann 專用的入口。</p>
+  <div class="card">
+    <b>第一次：把它放到桌面</b>
+    <ol>
+      <li>點 Safari 的「分享」（或先點「⋯」再點「分享」）</li>
+      <li>選「加入主畫面」→「新增」</li>
+      <li>回到桌面，點「學習中心」圖示打開</li>
+      <li>第一次打開時輸入「同步通行碼」</li>
+    </ol>
+  </div>
+  <a class="go" href="./index.html?user=wife">直接進入學習中心 ▶</a>
+</div>
+</body></html>
