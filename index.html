@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v6.2</title>
+<title>學習中心 v6.4</title>
 <meta name="theme-color" content="#16294e">
 <link rel="manifest" id="mf" href="./manifest.json">
 <script>/* v6.2：用 ?user=wife 開時，加到主畫面要記住 Ann 的網址 */try{if(new URLSearchParams(location.search).get('user')==='wife')document.getElementById('mf').href='./manifest-wife.json';}catch(e){}</script>
@@ -182,7 +182,7 @@ button:focus-visible,a:focus-visible{outline:3px solid var(--navy2);outline-offs
   </div>
 </div>
 
-<div class="veil" id="veil" onclick="closeSheet()"></div>
+<div class="veil" id="veil" onclick="veilTap()"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="開始上課">
   <h2>準備上課</h2>
   <p class="cname" id="shName"></p>
@@ -425,8 +425,11 @@ function openSheet(i){
   $('btnNotion').href=L.app;
   $('btnNotion').onclick=e=>{e.preventDefault();location.href=L.app;setTimeout(()=>window.open(L.web,'_blank'),1200);};
   $('btnGo').onclick=startSession;
-  $('veil').classList.add('on');$('sheet').classList.add('on');
+  veilAt=Date.now();$('veil').classList.add('on');$('sheet').classList.add('on');
 }
+/* v6.4：iPad 寬螢幕上，左右欄的「開始上課」按鈕打開視窗後正好在灰色背景上，多點一下就關掉；剛打開 0.5 秒內點背景不關 */
+let veilAt=0;
+function veilTap(){if(Date.now()-veilAt<500)return;closeSheet();}
 function closeSheet(){$('veil').classList.remove('on');$('sheet').classList.remove('on');$('endSheet').classList.remove('on');}
 function startSession(){
   active={course:sheetCourse.n,courseId:sheetCourse.id||null,start:new Date().toISOString(),user,device:deviceName()};
@@ -447,7 +450,7 @@ function openEnd(){
   $('endName').textContent=active.course;
   $('endMin').value=Math.max(1,Math.round((Date.now()-new Date(active.start))/60000));
   $('endUser').value=USER_LABEL[active.user]||active.user;$('endNote').value='';
-  $('veil').classList.add('on');$('endSheet').classList.add('on');
+  veilAt=Date.now();$('veil').classList.add('on');$('endSheet').classList.add('on');
 }
 function clearSession(){active=null;store.set('lc_active',null);clearInterval(tick);$('dock').classList.remove('on');closeSheet();}
 function discardSession(){clearSession();toast('已放棄,未記錄');}

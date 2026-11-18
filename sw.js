@@ -1,4 +1,4 @@
-const CACHE = 'learning-center-v8';
+const CACHE = 'learning-center-v9';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
