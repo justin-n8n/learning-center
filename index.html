@@ -1,8 +1,9 @@
 <!DOCTYPE html><html lang="zh-TW"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>學習中心 v6.1</title>
+<title>學習中心 v6.2</title>
 <meta name="theme-color" content="#16294e">
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" id="mf" href="./manifest.json">
+<script>/* v6.2：用 ?user=wife 開時，加到主畫面要記住 Ann 的網址 */try{if(new URLSearchParams(location.search).get('user')==='wife')document.getElementById('mf').href='./manifest-wife.json';}catch(e){}</script>
 <link rel="icon" href="./icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -252,10 +253,19 @@ function saveToken(){const v=$('tokenInput').value.trim();if(!v)return;store.set
 let courses=[], user='我', active=null, tick=null, recFilterW='all', platSel='全部', catSel='全部', sortSel='new';
 let cloudRecords = store.get('lc_cloud_records', []);
 
-function setUser(u){user=u;store.set('lc_user',u);$('uMe').classList.toggle('on',u==='我');$('uWife').classList.toggle('on',u!=='我');renderRecords();renderStats();}
+let lockUser=null; /* v6.2：Ann 的裝置只看 Ann 自己的紀錄 */
+function setUser(u){if(lockUser)u=lockUser;user=u;store.set('lc_user',u);$('uMe').classList.toggle('on',u==='我');$('uWife').classList.toggle('on',u!=='我');renderRecords();renderStats();}
 (function initUser(){
   const p=new URLSearchParams(location.search).get('user');
-  const u=p==='wife'?'老婆':p==='me'?'我':store.get('lc_user','我');
+  if(p==='wife')store.set('lc_lock','老婆');
+  else if(p==='me')store.set('lc_lock','');
+  lockUser=store.get('lc_lock','')||null;
+  if(lockUser){
+    recFilterW=lockUser;
+    $('uMe').style.display='none';$('uWife').style.cursor='default';$('uWife').onclick=null;
+    $('recFilter').style.display='none';
+  }
+  const u=lockUser||(p==='wife'?'老婆':p==='me'?'我':store.get('lc_user','我'));
   setUser(u);
 })();
 
@@ -305,7 +315,8 @@ async function loadRecords(){
 function localRecords(){return store.get('lc_records',[])}
 function records(){
   const pending=localRecords().filter(r=>!r.synced);
-  const all=[...pending,...cloudRecords];
+  let all=[...pending,...cloudRecords];
+  if(lockUser)all=all.filter(r=>r.user===lockUser);
   all.sort((a,b)=>String(b.start||'').localeCompare(String(a.start||'')));
   return all;
 }
